@@ -36,10 +36,22 @@ bool consume(char *op) {
   return true;
 }
 
+Token *consume_ident() {
+  Token *ident;
+  if (token->kind != TK_IDENT ||
+      token->len != 1 ||
+      token->str[0] < 'a' ||
+      token->str[0] > 'z')
+    return NULL;
+  ident = token;
+  token = token->next;
+  return ident;
+}
+
 void expect(char *op) {
   if (token->kind != TK_RESERVED || strlen(op) != token->len ||
       memcmp(token->str, op, token->len))
-    error_at(token->str, "'%c'ではありません", op);
+    error_at(token->str, "'%s'ではありません", op);
   token = token->next;
 }
 
@@ -95,7 +107,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (strchr("+-*/()<>", *p)) {
+    if (strchr("+-*/()<>=;", *p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
@@ -107,6 +119,12 @@ Token *tokenize() {
       cur->len = p - q;
       continue;
     }
+
+    if ('a' <= *p && *p <= 'z') {
+      cur = new_token(TK_IDENT, cur, p++, 1);
+      continue;
+    }
+
     error_at(p, "トークナイズできません");
   }
 
