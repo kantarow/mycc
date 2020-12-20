@@ -50,6 +50,20 @@ struct Node {
   int offset;    // kindがND_LVARの場合のみ使う
 };
 
+// local variable
+typedef struct LVar LVar;
+
+struct LVar {
+  LVar *next;
+  char *name;
+  int len;
+  int offset;
+};
+
+extern LVar *locals;
+
+LVar *find_lvar(Token *tok);
+
 // codegen
 void gen(Node *node);
 

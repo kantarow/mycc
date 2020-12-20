@@ -13,6 +13,9 @@ Node *mul();
 Node *unary();
 Node *primary();
 
+LVar tail = { NULL, NULL, 0, 0 };
+LVar *locals = &tail;
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -132,7 +135,20 @@ Node *primary() {
 
   Token *tok = consume_ident();
   if (tok != NULL) {
-    return new_node_ident(tok);
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+
+    LVar *lvar = find_lvar(tok);
+    if (lvar) {
+      node->offset = lvar->offset;
+    } else {
+      lvar = calloc(1, sizeof(LVar));
+      lvar->next = locals;
+      lvar->len = tok->len;
+      lvar->offset = locals->offset + 8;
+      node->offset = lvar->offset;
+      return new_node_ident(tok);
+    }
   }
 
   // そうでなければ数値のはず
