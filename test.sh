@@ -61,4 +61,7 @@ assert 5 'foo = 2; bar = 3; foo + bar;'
 
 assert 1 'nyan = 2; foo = 5; bar = 3; nyan == foo - bar;'
 
+assert 3 'return 3;'
+assert 6 'nyan = 3; return nyan * 2;'
+
 echo OK
