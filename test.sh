@@ -12,7 +12,6 @@ assert() {
 		echo "$input => $actual"
 	else
 		echo "$input => $expected expected, but got $actual"
-		exit 1
 	fi
 }
 
@@ -63,5 +62,9 @@ assert 1 'nyan = 2; foo = 5; bar = 3; nyan == foo - bar;'
 
 assert 3 'return 3;'
 assert 6 'nyan = 3; return nyan * 2;'
+
+assert 5 'a = 3; b = 6; c = 4; if(a < b) {c = 5;} return c;'
+
+assert 1 'a = 1; b = 2; c = 3; if (a + b == c) { c = 4; if (b < a * c) { c = c * 2 - (a + b + 4); } } return c;'
 
 echo OK

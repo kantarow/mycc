@@ -36,6 +36,13 @@ bool consume(char *op) {
   return true;
 }
 
+bool consume_by_kind(TokenKind kind) {
+  if (token->kind != kind)
+    return false;
+  token = token->next;
+  return true;
+}
+
 Token *consume_ident() {
   Token *ident;
   if (token->kind != TK_IDENT)
@@ -43,13 +50,6 @@ Token *consume_ident() {
   ident = token;
   token = token->next;
   return ident;
-}
-
-bool consume_return() {
-  if (token->kind != TK_RETURN)
-    return false;
-  token = token->next;
-  return true;
 }
 
 void expect(char *op) {
@@ -109,6 +109,22 @@ Token *tokenize() {
       continue;
     }
 
+    if (startswith(p, "if") && !is_alnum(*(p + 2))) {
+      cur = new_token(TK_IF, cur, p, 2);
+      p += 2;
+      continue;
+    }
+
+    if (*p == '{') {
+      cur = new_token(TK_RESERVED, cur, p++, 1);
+      continue;
+    }
+
+    if (*p == '}') {
+      cur = new_token(TK_RESERVED, cur, p++, 1);
+      continue;
+    }
+
     if (startswith(p, "<=") ||
         startswith(p, ">=") ||
         startswith(p, "==") ||
@@ -131,7 +147,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
+    if (strncmp(p, "return", 6) == 0 && !is_alnum(*(p + 6))) {
       cur = new_token(TK_RETURN, cur, p, 6);
       p += 6;
       continue;

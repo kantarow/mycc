@@ -11,6 +11,9 @@ typedef enum {
   TK_IDENT,    // 識別子
   TK_NUM,	   // 整数トークン
   TK_RETURN,   // return
+  TK_IF,       // if文
+  TK_SOB,      // ブロックの開始
+  TK_EOB,      // ブロックの終わり
   TK_EOF,      // 入力の終わりを表すトークン
 } TokenKind;
 
@@ -39,6 +42,8 @@ typedef enum {
   ND_LE,     // <=
   ND_NUM,    // 整数
   ND_RETURN, // return
+  ND_IF,
+  ND_BLOCK,
 } NodeKind;
 
 typedef struct Node Node;
@@ -46,8 +51,8 @@ typedef struct Node Node;
 // 抽象構文木のノードの型
 struct Node {
   NodeKind kind; // ノードの型
-  Node *lhs;     // 左辺
-  Node *rhs;     // 右辺
+  Node *child;   // 子ノードの先頭
+  Node *brother; // 弟妹ノード
   int val;       // kindがND_NUMの場合のみ使う
   int offset;    // kindがND_LVARの場合のみ使う
 };
@@ -75,8 +80,8 @@ void program();
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
+bool consume_by_kind(TokenKind kind);
 Token *consume_ident();
-bool consume_return();
 void expect(char *op);
 int expect_number();
 bool at_eof();

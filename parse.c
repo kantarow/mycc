@@ -19,8 +19,8 @@ LVar *locals = &tail;
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
-  node->lhs = lhs;
-  node->rhs = rhs;
+  node->child = lhs;
+  lhs->brother = rhs;
   return node;
 }
 
@@ -48,14 +48,37 @@ void program() {
 Node *stmt() {
   Node *node;
 
-  if (consume_return()) {
+  if (consume_by_kind(TK_RETURN)) {
     node = calloc(1, sizeof(node));
     node->kind = ND_RETURN;
-    node->lhs = expr();
-  } else {
-    node = expr();
+    node->child = expr();
+
+    expect(";");
+    return node;
   }
 
+  if (consume_by_kind(TK_IF)) {
+    node = calloc(1, sizeof(node));
+    node->kind = ND_IF;
+    Node *block = calloc(1, sizeof(node));
+    block->kind = ND_BLOCK;
+    expect("(");
+    node->child = expr();
+    node->child->brother = block;
+    expect(")");
+    expect("{");
+
+    Node **current = &(block->child);
+    while (!consume("}")) {
+      if (at_eof())
+        error("'}'がありません");
+      *current = stmt();
+      current = &((*current)->brother);
+    }
+    return node;
+  }
+
+  node = expr();
   expect(";");
   return node;
 }
