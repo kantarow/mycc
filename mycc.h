@@ -12,8 +12,7 @@ typedef enum {
   TK_NUM,	   // 整数トークン
   TK_RETURN,   // return
   TK_IF,       // if文
-  TK_SOB,      // ブロックの開始
-  TK_EOB,      // ブロックの終わり
+  TK_ELSE,     // else節
   TK_EOF,      // 入力の終わりを表すトークン
 } TokenKind;
 

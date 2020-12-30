@@ -115,13 +115,9 @@ Token *tokenize() {
       continue;
     }
 
-    if (*p == '{') {
-      cur = new_token(TK_RESERVED, cur, p++, 1);
-      continue;
-    }
-
-    if (*p == '}') {
-      cur = new_token(TK_RESERVED, cur, p++, 1);
+    if (startswith(p, "else") && !is_alnum(*(p+4))) {
+      cur = new_token(TK_ELSE, cur, p, 4);
+      p += 4;
       continue;
     }
 
@@ -134,7 +130,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (strchr("+-*/()<>=;", *p)) {
+    if (strchr("+-*/(){}<>=;", *p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }

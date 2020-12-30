@@ -23,12 +23,14 @@ void gen_block(Node *node) {
 
   while (current != NULL) {
     gen(current);
+    printf("  pop rax\n");
     current = current->brother;
   }
 }
 
 void gen(Node *node) {
   int label_count;
+  Node *current;
   switch (node->kind) {
     case ND_NUM:
       printf("  push %d\n", node->val);
@@ -55,12 +57,24 @@ void gen(Node *node) {
       return;
     case ND_IF:
       label_count = get_label_count();
-      gen(node->child);
+      current = node->child;
+      // 条件式
+      gen(current);
       printf("  pop rax\n");
       printf("  cmp rax, 0\n");
-      printf("  je .Lend%d\n", label_count);
-      gen_block(node->child->brother);
-      printf(".Lend%d:\n", label_count);
+      // 条件が真の時の処理
+      current = current->brother;
+      if (current->brother != NULL ) {
+        printf("  je .Lelse%d\n", label_count);
+        gen_block(current);
+        printf(".Lelse%d:\n", label_count);
+        // 条件が偽の時の処理
+        gen_block(current->brother);
+      } else {
+        printf("  je .Lend%d\n", label_count);
+        gen_block(current);
+        printf(".Lend%d:\n", label_count);
+      }
       return;
   }
 

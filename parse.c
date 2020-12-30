@@ -49,7 +49,7 @@ Node *stmt() {
   Node *node;
 
   if (consume_by_kind(TK_RETURN)) {
-    node = calloc(1, sizeof(node));
+    node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->child = expr();
 
@@ -58,22 +58,36 @@ Node *stmt() {
   }
 
   if (consume_by_kind(TK_IF)) {
-    node = calloc(1, sizeof(node));
+    node = calloc(1, sizeof(Node));
     node->kind = ND_IF;
-    Node *block = calloc(1, sizeof(node));
-    block->kind = ND_BLOCK;
+    Node *if_block = calloc(1, sizeof(Node));
+    if_block->kind = ND_BLOCK;
     expect("(");
     node->child = expr();
-    node->child->brother = block;
+    node->child->brother = if_block;
     expect(")");
     expect("{");
 
-    Node **current = &(block->child);
+    Node **current = &(if_block->child);
     while (!consume("}")) {
       if (at_eof())
         error("'}'がありません");
       *current = stmt();
       current = &((*current)->brother);
+    }
+
+    if (consume_by_kind(TK_ELSE)) {
+      Node *else_block = calloc(1, sizeof(Node));
+      else_block->kind = ND_BLOCK;
+      if_block->brother = else_block;
+      current = &(else_block->child);
+      expect("{");
+      while (!consume("}")) {
+        if (at_eof())
+          error("'}'がありません");
+        *current = stmt();
+        current = &((*current)->brother);
+      }
     }
     return node;
   }
