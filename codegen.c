@@ -71,10 +71,23 @@ void gen(Node *node) {
         // 条件が偽の時の処理
         gen_block(current->brother);
       } else {
-        printf("  je .Lend%d\n", label_count);
+        printf("  je .Lendif%d\n", label_count);
         gen_block(current);
-        printf(".Lend%d:\n", label_count);
+        printf(".Lendif%d:\n", label_count);
       }
+      return;
+    case ND_WHILE:
+      label_count = get_label_count();
+      printf(".Lbeginwhile:\n");
+      // 条件式
+      gen(node->child);
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");
+      printf("  je .Lendwhile\n");
+      // ループ内の処理
+      gen_block(node->child->brother);
+      printf("  jmp .Lbeginwhile\n");
+      printf(".Lendwhile:\n");
       return;
   }
 

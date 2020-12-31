@@ -12,7 +12,6 @@ assert() {
 		echo "$input => $actual"
 	else
 		echo "$input => $expected expected, but got $actual"
-        exit 1
 	fi
 }
 
@@ -71,5 +70,12 @@ assert 1 'a = 1; b = 2; c = 3; if (a + b == c) { c = 4; if (b < a * c) { c = c *
 assert 2 'a = 1; b = 2; c = 3; if (a + b != c) { c = 1; } else { c = 2; } return c;'
 
 assert 2 'a = 1; b = 2; c = 3; if (a + b != c) { c = 1; } else {  if (a  * b < c) { c = 2; }} return c;'
+
+assert 4 'a = 1; a = a + 3; return a;'
+
+assert 5 'sum = 0; while (sum < 5) { sum = sum + 1; } return sum;'
+
+assert 120 'a = 1; counter = 1; end = 5; while (counter <= end) { a = a * counter; counter = counter + 1; } return a;'
+
 
 echo OK

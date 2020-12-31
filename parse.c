@@ -6,6 +6,7 @@ Node *new_node_num(int val);
 Node *expr();
 Node *assign();
 Node *stmt();
+Node *block();
 Node *equality();
 Node *relational();
 Node *add();
@@ -60,40 +61,48 @@ Node *stmt() {
   if (consume_by_kind(TK_IF)) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_IF;
-    Node *if_block = calloc(1, sizeof(Node));
-    if_block->kind = ND_BLOCK;
     expect("(");
     node->child = expr();
-    node->child->brother = if_block;
     expect(")");
-    expect("{");
 
-    Node **current = &(if_block->child);
-    while (!consume("}")) {
-      if (at_eof())
-        error("'}'がありません");
-      *current = stmt();
-      current = &((*current)->brother);
-    }
+    Node *if_block = block();
+    node->child->brother = if_block;
 
-    if (consume_by_kind(TK_ELSE)) {
-      Node *else_block = calloc(1, sizeof(Node));
-      else_block->kind = ND_BLOCK;
-      if_block->brother = else_block;
-      current = &(else_block->child);
-      expect("{");
-      while (!consume("}")) {
-        if (at_eof())
-          error("'}'がありません");
-        *current = stmt();
-        current = &((*current)->brother);
-      }
-    }
+    if (consume_by_kind(TK_ELSE))
+      if_block->brother = block();
+
+    return node;
+  }
+
+  if (consume_by_kind(TK_WHILE)) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_WHILE;
+    expect("(");
+    node->child = expr();
+    expect(")");
+    node->child->brother = block();
+
     return node;
   }
 
   node = expr();
   expect(";");
+  return node;
+}
+
+Node *block() {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_BLOCK;
+  Node **current = &(node->child);
+  expect("{");
+
+  while(!consume("}")) {
+    if (at_eof())
+      error("'}'がありません");
+    *current = stmt();
+    current = &((*current)->brother);
+  }
+
   return node;
 }
 
