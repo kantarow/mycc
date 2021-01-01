@@ -31,13 +31,6 @@ Node *new_node_num(int val) {
   return node;
 }
 
-Node *new_node_ident(Token *tok) {
-  Node *node = calloc(1, sizeof(Node));
-  node->kind = ND_LVAR;
-  node->offset = (tok->str[0] - 'a' + 1) * 8;
-  return node;
-}
-
 void program() {
   int i = 0;
   while (!at_eof())
