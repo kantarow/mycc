@@ -22,13 +22,20 @@ int main(int argc, char **argv) {
   printf("main:\n");
 
   // プロローグ
-  // 変数26個分の領域を確保
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
   printf("  sub rsp, 208\n");
 
   for (int i=0; code[i]; i++) {
-    gen(code[i]);
+    switch(gen(code[i])) {
+      case ND_IF:
+      case ND_WHILE:
+      case ND_FOR:
+      case ND_ASSIGN:
+      case ND_RETURN:
+        continue;
+    }
+
     printf("  pop rax\n");
   }
 

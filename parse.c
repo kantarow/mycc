@@ -14,8 +14,7 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-LVar tail = { NULL, NULL, 0, 0 };
-LVar *locals = &tail;
+LVar *head = NULL;
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
@@ -81,6 +80,30 @@ Node *stmt() {
     node->child = expr();
     expect(")");
     node->child->brother = block();
+
+    return node;
+  }
+
+  if (consume_by_kind(TK_FOR)) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_FOR;
+
+    Node *current;
+
+    expect("(");
+    // 初期化式
+    node->child = expr();
+    current = node->child;
+    expect(";");
+    // 条件式
+    current->brother = expr();
+    expect(";");
+    current = current->brother;
+    // 変化式
+    current->brother = expr();
+    expect(")");
+    current = current->brother;
+    current->brother = block();
 
     return node;
   }
@@ -193,17 +216,24 @@ Node *primary() {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
 
-    LVar *lvar = find_lvar(tok);
-    if (lvar) {
+    LVar *lvar = find_lvar(tok, head);
+    if (lvar != NULL) {
       node->offset = lvar->offset;
     } else {
-      lvar = calloc(1, sizeof(LVar));
-      lvar->next = locals;
+      lvar = (LVar *)calloc(1, sizeof(LVar));
       lvar->len = tok->len;
-      lvar->offset = locals->offset + 8;
+      lvar->name = tok->str;
+      if (head == NULL) {
+        lvar->offset = 0;
+        head = lvar;
+      } else {
+        lvar->offset = head->offset + 8;
+        lvar->next = head;
+        head = lvar;
+      }
       node->offset = lvar->offset;
-      return new_node_ident(tok);
     }
+    return node;
   }
 
   // そうでなければ数値のはず

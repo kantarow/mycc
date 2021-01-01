@@ -77,5 +77,7 @@ assert 5 'sum = 0; while (sum < 5) { sum = sum + 1; } return sum;'
 
 assert 120 'a = 1; counter = 1; end = 5; while (counter <= end) { a = a * counter; counter = counter + 1; } return a;'
 
+assert 8 'for (i=1; i<5; i=i) { i=i*2; } return i;'
+assert 55 'sum = 0; for (i=0; i<=10; i=i+1) { sum = sum + i; } return sum;'
 
 echo OK

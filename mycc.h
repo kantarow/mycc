@@ -14,6 +14,7 @@ typedef enum {
   TK_IF,       // if文
   TK_ELSE,     // else節
   TK_WHILE,    // while文
+  TK_FOR,      // for文
   TK_EOF,      // 入力の終わりを表すトークン
 } TokenKind;
 
@@ -44,6 +45,7 @@ typedef enum {
   ND_RETURN, // return
   ND_IF,
   ND_WHILE,
+  ND_FOR,
   ND_BLOCK,
 } NodeKind;
 
@@ -68,12 +70,10 @@ struct LVar {
   int offset;
 };
 
-extern LVar *locals;
-
-LVar *find_lvar(Token *tok);
+LVar *find_lvar(Token *tok, LVar *head);
 
 // codegen
-void gen(Node *node);
+NodeKind gen(Node *node);
 
 // parse
 void program();
