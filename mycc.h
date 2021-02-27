@@ -47,6 +47,7 @@ typedef enum {
   ND_WHILE,
   ND_FOR,
   ND_BLOCK,
+  ND_CALLFUNC,
 } NodeKind;
 
 typedef struct Node Node;
@@ -58,6 +59,7 @@ struct Node {
   Node *brother; // 弟妹ノード
   int val;       // kindがND_NUMの場合のみ使う
   int offset;    // kindがND_LVARの場合のみ使う
+  char *func_name;    // 関数名. kindがND_CALLFUNCの場合のみ使う
 };
 
 // local variable

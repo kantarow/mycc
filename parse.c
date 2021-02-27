@@ -206,27 +206,51 @@ Node *primary() {
 
   Token *tok = consume_ident();
   if (tok != NULL) {
-    Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
+    if (consume("(")) {
+      Node *node = calloc(1, sizeof(Node));
+      node->func_name = malloc(tok->len+1 * sizeof(char));
+      strncpy(node->func_name, tok->str, tok->len);
+      node->kind = ND_CALLFUNC;
 
-    LVar *lvar = find_lvar(tok, head);
-    if (lvar != NULL) {
-      node->offset = lvar->offset;
-    } else {
-      lvar = (LVar *)calloc(1, sizeof(LVar));
-      lvar->len = tok->len;
-      lvar->name = tok->str;
-      if (head == NULL) {
-        lvar->offset = 0;
-        head = lvar;
-      } else {
-        lvar->offset = head->offset + 8;
-        lvar->next = head;
-        head = lvar;
+      // 引数がなければ即return
+      if (consume(")")) {
+        return node;
       }
-      node->offset = lvar->offset;
+
+      node->child = expr();
+      Node *current = node->child;
+
+      while(consume(",")) {
+        current->brother = expr();
+        current = current->brother;
+      }
+
+      expect(")");
+      return node;
+    } else {
+      // ローカル変数
+      Node *node = calloc(1, sizeof(Node));
+      node->kind = ND_LVAR;
+
+      LVar *lvar = find_lvar(tok, head);
+      if (lvar != NULL) {
+        node->offset = lvar->offset;
+      } else {
+        lvar = (LVar *)calloc(1, sizeof(LVar));
+        lvar->len = tok->len;
+        lvar->name = tok->str;
+        if (head == NULL) {
+          lvar->offset = 0;
+          head = lvar;
+        } else {
+          lvar->offset = head->offset + 8;
+          lvar->next = head;
+          head = lvar;
+        }
+        node->offset = lvar->offset;
+      }
+      return node;
     }
-    return node;
   }
 
   // そうでなければ数値のはず

@@ -2,6 +2,8 @@
 
 int internal_label_count = 0;
 
+char ARG_REGS[6][4] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+
 int get_label_count() {
   return internal_label_count++;
 }
@@ -110,6 +112,19 @@ NodeKind gen(Node *node) {
       printf("  jmp .Lbeginfor\n");
       printf(".Lendfor:\n");
       return ND_FOR;
+    case ND_CALLFUNC:
+      printf("  sub rsp, 0x08\n");
+      int argc;
+      current = node->child;
+
+      for (argc=0; argc<6 && current!=NULL; argc++) {
+        gen(current);
+        printf("  pop rax\n");
+        printf("  mov %s, rax\n", ARG_REGS[argc]);
+        current = current->brother;
+      }
+      printf("  call %s\n", node->func_name);
+      return ND_CALLFUNC;
   }
 
   gen(node->child);
